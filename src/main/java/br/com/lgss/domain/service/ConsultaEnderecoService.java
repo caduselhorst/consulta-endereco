@@ -11,6 +11,7 @@ import org.springframework.web.client.RestTemplate;
 
 import br.com.lgss.domain.exception.CepMalFormadoException;
 import br.com.lgss.domain.exception.CepNaoEncontradoException;
+import br.com.lgss.domain.exception.ErroExternoException;
 import br.com.lgss.domain.exception.ParametroLocalidadeInvalidoException;
 import br.com.lgss.domain.model.EnderecoCorreio;
 
@@ -45,10 +46,15 @@ public class ConsultaEnderecoService {
 	
 	public List<EnderecoCorreio> consultaEnderecosPorLocalidade(String uf, String cidade, String logradouro) {
 		try {
-			URI resourceURI = URI.create(String.format("https://viacep.com.br/ws/%1s/%2s/%3s/json", 
-					uf, cidade, logradouro));
+						
+			String url = String.format("https://viacep.com.br/ws/%1s/%2s/%3s/json", 
+					uf, formataNomeCidade(cidade), logradouro);
+						
+			System.out.println(url);
+			
+			URI resourceUri = URI.create(url);
 
-			EnderecoCorreio[] enderecos = restTemplate.getForObject(resourceURI, EnderecoCorreio[].class);
+			EnderecoCorreio[] enderecos = restTemplate.getForObject(resourceUri, EnderecoCorreio[].class);
 			
 			return Arrays.asList(enderecos);
 		} catch (RestClientResponseException e) {
@@ -56,9 +62,25 @@ public class ConsultaEnderecoService {
 			if(e.getRawStatusCode() == 400) {
 				throw new ParametroLocalidadeInvalidoException("Parâmetro de localidade inválido");
 			} else {
-				throw new RuntimeException("Ocorreu um erro ao consultar o cep", e);
+				throw new ErroExternoException("Ocorreu um erro ao consultar o cep", e);
 			}
-		}
+		} 
+	}
+	
+	private String formataNomeCidade(String cidade) {
+		
+		String novo = cidade.replace(" ", "%20");
+		
+		return novo.toLowerCase()
+				.replace("ã", "a")
+				.replace("õ", "o")
+				.replace("á", "a")
+				.replace("é", "e")
+				.replace("ç", "c")
+				.replace("ó", "o")
+				.replace("ê", "e")
+				.replace("â", "a");
+		
 	}
 
 }

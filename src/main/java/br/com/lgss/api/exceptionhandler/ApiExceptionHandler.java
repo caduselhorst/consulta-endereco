@@ -15,6 +15,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 import br.com.lgss.domain.exception.CepMalFormadoException;
 import br.com.lgss.domain.exception.CepNaoEncontradoException;
+import br.com.lgss.domain.exception.ErroExternoException;
 import br.com.lgss.domain.exception.ParametroLocalidadeInvalidoException;
 
 @ControllerAdvice
@@ -122,6 +123,23 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 		
 		
 		String detail = "Cep não encontrado na base dos correios";
+		
+		Problema problema = createProblemaBuilder(status, tipoProblema, detail)
+				.mensagemUsuario(detail)
+				.build();
+		
+		return handleExceptionInternal(e, problema, 
+				new HttpHeaders(), status, request);
+	}
+	
+	@ExceptionHandler(ErroExternoException.class)
+	public ResponseEntity<?> handleErroExternoException(ErroExternoException e, 
+			WebRequest request) {
+		HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
+		TipoProblema tipoProblema = TipoProblema.ERRO_DE_SISTEMA;
+		
+		
+		String detail = "Ocorreu um erro externo ao serviço. Tente novamente mais tarde.";
 		
 		Problema problema = createProblemaBuilder(status, tipoProblema, detail)
 				.mensagemUsuario(detail)
