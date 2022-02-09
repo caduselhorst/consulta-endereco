@@ -48,7 +48,7 @@ public class ConsultaEnderecoService {
 		try {
 						
 			String url = String.format("https://viacep.com.br/ws/%1s/%2s/%3s/json", 
-					uf, formataNomeCidade(cidade), logradouro);
+					uf, formataValorParametro(cidade), formataValorParametro(logradouro));
 						
 			System.out.println(url);
 			
@@ -67,9 +67,9 @@ public class ConsultaEnderecoService {
 		} 
 	}
 	
-	private String formataNomeCidade(String cidade) {
+	private String formataValorParametro(String parametro) {
 		
-		String novo = cidade.replace(" ", "%20");
+		String novo = parametro.replace(" ", "%20");
 		
 		return novo.toLowerCase()
 				.replace("ã", "a")
